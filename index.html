@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatApp</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    
+<!-- コンテンツ表示画面 -->
+
+<div class="container">
+    <div class="textArea">
+        <div class="name"> <i class="fas fa-user"></i> NAME:<input type="text" id="uname"> </div>
+        <div>
+            <textarea id="text" cols="50" rows="5"></textarea>
+            <button id="send">📩</button>
+        </div>
+    </div>
+    <div id="output"></div>
+</div>
+
+
+<!-- JQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- JQuery -->
+
+<!--** 以下Firebase **-->
+<script type="module">
+
+    import firebaseConfig from "./firebaseAPIkey.js";
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, push, set, update, remove, onChildAdded, onChildChanged, onChildRemoved } 
+    from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    
+    // Your web app's Firebase configuration
+
+      
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dbRef = ref(db, "chat")
+
+    //送信
+    $("#send").on("click", function(){
+        const msg = {
+            uname : $("#uname").val(),
+            text : $("#text").val(),
+            timestamp: new Date().toISOString() // 現在の時刻をISO 8601形式で取得
+        }
+        const newPostRef = push(dbRef); //ユニークキーを生成
+        set (newPostRef,msg); //DBに値をセット        
+        $("#text").val(""); //textareaを空にする
+    });
+
+    //最初にデータ取得&onSnapshotでリアルタイムにデータ取得
+    onChildAdded(dbRef,function(data){
+        const msg = data.val();
+        const key = data.key; //削除・更新に必須
+        let h = '<div id="'+key+'">';       
+        h += '<p><i class="fas fa-user"></i> '+ msg.uname +'</p>';
+        h += '<div class="balloon">';
+        h += '<span contentEditable="true" id="'+key+'_update">'+msg.text+'</span>';
+        h += '<div class="remove_update">';
+        h += '<span class="remove" data-key="'+key+'">🚮</span>'
+        h += '<span class="update" data-key="'+key+'">🆙</span>'
+        h += '</div>';
+        h += '</div>';
+        h += '<p class="sent">SENT: ' + new Date(msg.timestamp).toLocaleString() + '</p>'; // ISO 8601形式から日時を取得
+        h += '</div>';
+        $("#output").append(h);
+    });
+    
+    //削除イベント
+    $("#output").on("click", ".remove", function(){
+        const key= $(this).attr("data-key");
+        const remove_item = ref(db, "chat/"+key);
+        remove(remove_item); //Firebaseデータ削除関数
+    });
+
+    //削除処理がFirebase側で実行されたらイベント発生
+    onChildRemoved(dbRef, (data) =>{
+        $("#"+data.key).remove(); //DOM操作関数（対象を削除）
+    });
+
+    //更新イベント
+    $("#output").on("click", ".update", function(){
+        const key = $(this).attr("data-key");
+        update(ref(db, "chat/"+key),{
+            text: $("#"+key+'_update').html()
+        });
+    });
+
+    //更新処理がFirebase側で実行されたらイベント発生
+    onChildChanged(dbRef, (data) => {
+        $("#"+data.key+'_update').html(data.val().text);
+        $("#"+data.key+'_update').fadeOut(800).fadeIn(800);
+    });
+</script>
+</body>
+</html>
