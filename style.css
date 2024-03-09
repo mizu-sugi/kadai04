@@ -1,6 +1,6 @@
 
 body{
-    background-image: url('/img/sakura.jpg');
+    background-image: url('img/sakura.jpg');
 }
 
 .container {
@@ -24,7 +24,7 @@ body{
     width: 400px;
     overflow: auto;
     height: 500px;
-    background-image: url('/img/sky.jpg');
+    background-image: url('img/sky.jpg');
     margin-right:150px;
     border-radius: 10px;
 }

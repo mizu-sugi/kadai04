@@ -6,6 +6,7 @@
     <title>ChatApp</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="./js/test.js"></script>
 </head>
 <body>
     
@@ -30,11 +31,12 @@
 <!--** 以下Firebase **-->
 <script type="module">
 
-    import firebaseConfig from "./js/firebaseAPIkey.js";
+    
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getDatabase, ref, push, set, update, remove, onChildAdded, onChildChanged, onChildRemoved } 
     from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    //import firebaseConfig from "./test.js";
     
     // Your web app's Firebase configuration
 
